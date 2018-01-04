@@ -143,6 +143,10 @@ function commerce_license_entity_info() {
         // The name of the class to use when loading an invalid bundle.
         'broken class' => 'CommerceLicenseBroken',
       ),
+      'permission labels' => [
+        'singular' => t('license'),
+        'plural' => t('licenses'),
+      ],
       'fieldable' => TRUE,
       'entity keys' => array(
         'id' => 'license_id',
@@ -211,19 +215,7 @@ function commerce_license_views_api() {
  * Implements hook_permission().
  */
 function commerce_license_permission() {
-  return array(
-    'administer licenses' => array(
-      'title' => t('Administer licenses'),
-      'restrict access' => TRUE,
-    ),
-    'view all licenses' => array(
-      'title' => t('View all licenses'),
-      'restrict access' => TRUE,
-    ),
-    'view own licenses' => array(
-      'title' => t('View own licenses'),
-    ),
-  );
+  return commerce_entity_access_permissions('commerce_license');
 }
 
 /**
