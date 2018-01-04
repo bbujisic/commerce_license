@@ -22,7 +22,7 @@ function commerce_license_role_menu() {
     'title' => 'Role',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('commerce_license_role_settings_form'),
-    'access arguments' => array('administer licenses'),
+    'access arguments' => array('administer commerce_license entities'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/commerce_license_role.admin.inc',
   );
