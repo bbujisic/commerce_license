@@ -394,3 +394,21 @@ function commerce_license_update_7104(&$sandbox) {
   return t('Updated all timestamp fields to accomodate larger values.');
 }
 
+/**
+ * Update permission names for license entity management.
+ */
+function commerce_license_update_7105() {
+  // Load utility functions.
+  module_load_install('commerce');
+
+  $map = array(
+    'administer licenses' => 'administer commerce_license entities',
+    'view all licenses' => 'view any commerce_license entity',
+    'view own licenses' => 'view own commerce_license entities',
+  );
+
+  commerce_update_rename_permissions($map);
+
+  return t('Role and custom View permissions updated for license entity management. Access checks in modules and permissions on default Views must be updated manually.');
+
+}

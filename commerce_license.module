@@ -70,7 +70,7 @@ function commerce_license_menu() {
     'description' => 'Configure licensing settings.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('commerce_license_settings_form'),
-    'access arguments' => array('administer licenses'),
+    'access arguments' => array('administer commerce_license entities'),
     'file' => 'includes/commerce_license.admin.inc',
   );
   $items['admin/commerce/config/license/general'] = array(
@@ -143,6 +143,10 @@ function commerce_license_entity_info() {
         // The name of the class to use when loading an invalid bundle.
         'broken class' => 'CommerceLicenseBroken',
       ),
+      'permission labels' => [
+        'singular' => t('license'),
+        'plural' => t('licenses'),
+      ],
       'fieldable' => TRUE,
       'entity keys' => array(
         'id' => 'license_id',
@@ -161,9 +165,10 @@ function commerce_license_entity_info() {
       ),
       'metadata controller class' => 'CommerceLicenseMetadataController',
       'views controller class' => 'CommerceLicenseViewsController',
-      'access callback' => 'commerce_license_access',
+      'access callback' => 'commerce_entity_access',
       'access arguments' => array(
         'user key' => 'uid',
+        'access tag' => 'commerce_license_access',
       ),
       'inline entity form' => array(
         'controller' => 'CommerceLicenseInlineEntityFormController',
@@ -176,6 +181,15 @@ function commerce_license_entity_info() {
     );
   }
   return $return;
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ *
+ * @param \QueryAlterableInterface $query
+ */
+function commerce_license_query_commerce_license_access_alter(QueryAlterableInterface $query) {
+  commerce_entity_access_query_alter($query, 'commerce_license');
 }
 
 /**
@@ -211,58 +225,7 @@ function commerce_license_views_api() {
  * Implements hook_permission().
  */
 function commerce_license_permission() {
-  return array(
-    'administer licenses' => array(
-      'title' => t('Administer licenses'),
-      'restrict access' => TRUE,
-    ),
-    'view all licenses' => array(
-      'title' => t('View all licenses'),
-      'restrict access' => TRUE,
-    ),
-    'view own licenses' => array(
-      'title' => t('View own licenses'),
-    ),
-  );
-}
-
-/**
- * Checks license access for various operations.
- *
- * @param $op
- *   The operation being performed. One of 'view', 'update', 'create' or
- *   'delete'.
- * @param $license
- *   Optionally a license to check access for or for the create operation the
- *   product type.
- *   If nothing is given access permissions for all licenses are returned.
- * @param $account
- *   The user to check for. Leave it to NULL to check for the current user.
- */
-function commerce_license_access($op, $license = NULL, $account = NULL) {
-  if (!isset($account)) {
-    $account = $GLOBALS['user'];
-  }
-
-  // Grant all access to the admin user.
-  if (user_access('administer licenses', $account)) {
-    return TRUE;
-  }
-
-  if (isset($license) && $op == 'view') {
-    // If there's no user attached, the license is still in checkout, so
-    // allow it to be viewed freely.
-    if ($license->uid == 0) {
-      return TRUE;
-    }
-    // If the user has the "view all licenses" permission, they pass.
-    if (user_access('view all licenses', $account)) {
-      return TRUE;
-    }
-    return (($license->uid == $account->uid) && user_access('view own licenses', $account));
-  }
-
-  return FALSE;
+  return commerce_entity_access_permissions('commerce_license');
 }
 
 /**
@@ -272,7 +235,7 @@ function commerce_license_access($op, $license = NULL, $account = NULL) {
  * to administer the licenses.
  */
 function commerce_license_sync_access($account = NULL) {
-  return module_exists('advancedqueue') && user_access('administer licenses', $account);
+  return module_exists('advancedqueue') && user_access('administer commerce_license entities', $account);
 }
 
 /**
